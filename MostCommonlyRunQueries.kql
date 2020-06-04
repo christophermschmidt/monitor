@@ -1,0 +1,15 @@
+//use the below query to see the most commonly run queries from Power BI. The below reutnrs the number of users who ran the query, the total number of times run, and average/min/max duration. It is filtered to only return the top 50 results by default.
+let window = AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ApplicationName_s == "PowerBI" and OperationName == "QueryEnd"
+ | where TimeGenerated >= ago(7d);
+window
+// convert the Duration column to int
+| extend Duration_i = toint(Duration_s)
+//filter out errors
+| where Error_s == "0" 
+//group by the queries and count, max, min, and avg them 
+| summarize avg(Duration_i), min(Duration_i), max(Duration_i), count(), NumUsersWhoRanQuery = dcount(EffectiveUsername_s)  by TextData_s
+//only keep queries that had a max duration longer than 5 seconds over the given timespan
+| where max_Duration_i >= 5000
+//keep the top 50 of the most commonly run queries used by the most users
+| top 50 by NumUsersWhoRanQuery desc

@@ -1,0 +1,9 @@
+//use the below query to identify the amount of time used to perform a replica sync across the nodes. This query is designed to work when the replicasyncmode is set to 1 (default) 
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" 
+//event subclass 41 executes the initial detach against the primary :rw node. 42 executes the attach against the replicas
+| where OperationName == "ProgressReportEnd" and EventSubclass_s in (41,42)
+| project duration_ms = Duration_s ,duration_sec = datetime_diff('second', EndTime_t, StartTime_t), StartTime = StartTime_t , EndTime = EndTime_t , CPUTime_ms = toint(CPUTime_s) , Success_s , Error_s , RootActivityId_g , IsQueryScaleoutReadonlyInstance_s , DatabaseName = DatabaseName_s , Server = ServerName_s , ResourceGroup , Instance = Resource 
+//if you want the sync time rolled up per instance, use the below summarize statement. if you want the individualized replica times, comment the below line out
+| summarize total_duration_in_seconds = sum(duration_sec), StartTime = min(StartTime), EndTime = max(EndTime), Success_ind = min(Success_s), sum(CPUTime_ms) by RootActivityId_g, Instance, DatabaseName
+| order by StartTime asc
