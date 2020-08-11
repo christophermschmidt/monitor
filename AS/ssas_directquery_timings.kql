@@ -1,4 +1,4 @@
- let window =  AzureDiagnostics | where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ServerName_s contains "ladev001";
+ let window =  AzureDiagnostics | where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ServerName_s contains "nameofaasserver";
 window
     | where OperationName == "DirectQueryBegin" 
     | project  OperationName,TextData_s,DatabaseName_s,ApplicationName_s,StartTime_t,EffectiveUsername_s ,User_s, ServerName_s, CPUTime_s, SPID_s, RootActivityId_g 
