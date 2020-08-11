@@ -1,4 +1,0 @@
-//gather the LogMetrics for the AAS instance out of the AzureDiagnostics table. This would include any replicas if they have been created for the instance. 
-AzureDiagnostics
-| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES"
-| where OperationName == "LogMetric" 

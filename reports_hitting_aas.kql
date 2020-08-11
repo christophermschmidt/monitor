@@ -1,8 +1,0 @@
-
-//This query finds the number of times queries were run per report with max and average durations for each over a given timespan
-AzureDiagnostics
-| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" 
-| where OperationName == "QueryEnd"
-| extend ReportName = extractjson("$.Sources[0].ReportId", ApplicationContext_s)
-| project ApplicationContext_s, toint(Duration_s), ReportName, Resource, ServerName_s, TextData_s, EffectiveUsername_s, RootActivityId_g, ApplicationName_s 
-| summarize NumberOfQueriesRun = dcount(RootActivityId_g), DistinctUsers=dcount(EffectiveUsername_s), ReportDurationMax = max(Duration_s), ReportDurationAvg = avg(Duration_s) by ApplicationName_s, Resource, ReportName
