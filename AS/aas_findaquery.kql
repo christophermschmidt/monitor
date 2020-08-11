@@ -1,0 +1,9 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" 
+| where OperationName == "QueryEnd"
+| where TextData_s contains "<some portion of your query text here>"
+
+//once you find the query, run this query and put in the RAID
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES"
+| where RootActivityId_g == "<your RAID here for the cold/hot run>"

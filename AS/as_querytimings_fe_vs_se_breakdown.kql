@@ -1,0 +1,18 @@
+ let window =  AzureDiagnostics
+   | where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and RootActivityId_g == "<yourRAIDactivityIDhere>";
+window
+| where OperationName has "QueryEnd" or (OperationName has "CommandEnd" and EventSubclass_s == 38)
+| where extract(@"([^,]*)", 1,Duration_s, typeof(long)) > 0
+ | extend DurationMs=extract(@"([^,]*)", 1,Duration_s, typeof(long))
+| extend Engine_CPUTime=extract(@"([^,]*)", 1,CPUTime_s, typeof(long))
+| project  OperationName,RootActivityId_g ,TextData_s,DatabaseName_s,ApplicationName_s,StartTime_t,EndTime_t,Duration_s  , EffectiveUsername_s ,User_s,EventSubclass_s ,DurationMs,Engine_CPUTime, ServerName_s , IsQueryScaleoutReadonlyInstance_s
+| join kind=leftouter (
+window
+    | where OperationName == "ProgressReportEnd" or (OperationName == "VertiPaqSEQueryEnd" and EventSubclass_s  != 10) or OperationName == "DiscoverEnd" or (OperationName has "CommandEnd" and EventSubclass_s != 38)
+    | summarize sum_Engine_CPUTime = sum(extract(@"([^,]*)", 1,CPUTime_s, typeof(long))) by RootActivityId_g
+    ) on RootActivityId_g
+| extend totalCPU = sum_Engine_CPUTime + Engine_CPUTime
+//| summarize sum(totalCPU) by 
+//OperationName,RootActivityId_g ,TextData_s,DatabaseName_s,ApplicationName_s,StartTime_t,EndTime_t,Duration_s  , EffectiveUsername_s ,User_s,EventSubclass_s ,DurationMs,Engine_CPUTime,sum_Engine_CPUTime,totalCPU
+| order by DurationMs desc
+| project totalCPU, FormulaEngineCPUTime = Engine_CPUTime, StorageEngineCPUTime = sum_Engine_CPUTime, Duration_s 

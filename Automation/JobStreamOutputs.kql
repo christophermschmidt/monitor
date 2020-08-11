@@ -1,0 +1,6 @@
+//azure powershell job stream outputs from the last 14 days
+AzureDiagnostics
+| where TimeGenerated >= startofday(ago(14d))
+| where ResourceProvider == "MICROSOFT.AUTOMATION" and Category == "JobStreams"
+| project-away ResourceId, Tenant_g, Computer, ResourceGroup, SubscriptionId, ResourceProvider, Resource, ResourceType, Type 
+| sort by TimeGenerated desc

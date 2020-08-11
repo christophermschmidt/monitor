@@ -1,0 +1,7 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.DATAFACTORY"
+| where Category == "PipelineRuns"
+| where status_s == "Succeeded" or status_s == "Failed"
+| project Resource, runId_g, pipelineName_s, Message, start_t, end_t, Annotations_s 
+| extend DurationMs = datetime_diff('millisecond', end_t, start_t) 
+| where pipelineName_s contains "dim" 

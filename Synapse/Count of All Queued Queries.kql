@@ -1,0 +1,3 @@
+AzureDiagnostics
+| where Category contains "waits" 
+| where Type_s == "UserConcurrencyResourceType"

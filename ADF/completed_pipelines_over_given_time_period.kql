@@ -1,0 +1,7 @@
+//start by getting the runs that completed, either by using the Completed or Failed status codes
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.DATAFACTORY"
+| where Category == "PipelineRuns"
+| where status_s == "Succeeded" or status_s == "Failed"
+| project runId_g, pipelineName_s, Message, start_t, end_t, Data_Provider_Key= Parameters_PartitionName_s , TimePeriodEndDate = Parameters_SubpartitionName_s, Target_Table = Parameters_TrgtTableName_s 
+| extend DurationMs = datetime_diff('millisecond', end_t, start_t) 

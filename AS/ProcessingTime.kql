@@ -1,0 +1,7 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES"
+| where EventClass_s == "COMMAND_END"
+| extend DurationMs=extract(@"([^,]*)", 1,Duration_s, typeof(long))
+| project RootActivityId_g, TextData_s, StartTime_t, EndTime_t
+| where TextData_s contains "Refresh"
+| where StartTime_t <> todatetime('1601-01-01T00:00:00Z')

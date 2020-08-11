@@ -1,0 +1,5 @@
+//# of errors per resource
+AzureDiagnostics
+| where Status_s == "Failed" or Level == "Error" or ResultType contains "Fail" 
+| extend consolidated_status = coalesce(Status_s, Level, ResultType) 
+| summarize count() by Resource, consolidated_status

@@ -1,0 +1,3 @@
+AzureDiagnostics
+| where Resource == "MSAPACTESTONLY" and Category == "ExecRequests"
+| project TimeGenerated, SessionID_s, SubmitTime_t, EndCompileTime_t, StartTime_t, EndTime_t , Label_s , StatementType_s, status_s, Command_s, Category, OperationName, RequestId_s 

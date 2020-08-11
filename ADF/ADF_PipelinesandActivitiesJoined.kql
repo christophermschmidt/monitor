@@ -1,0 +1,26 @@
+let adfdata = //start by getting the runs that completed, either by using the Completed or Failed status codes
+union AzureDiagnostics, workspace("log-analytics-cdh-datahub-eu-04").AzureDiagnostics, workspace("log-analytics-cdh-datahub-na-13").AzureDiagnostics, workspace("log-analytics-cdh-datahub-ja-01").AzureDiagnostics
+//only pull the last 7 days
+| where TimeGenerated >= ago(7d)
+//where the service is Data Factory
+| where ResourceProvider == "MICROSOFT.DATAFACTORY";
+adfdata
+    //only grab pipeline runs
+    | where Category == "PipelineRuns"
+    | where status_s == "Succeeded" or status_s == "Failed"
+    | project runId_g, pipelineName_s, Message, start_t, end_t, Data_Provider_Key= Parameters_PartitionName_s , TimePeriodEndDate = Parameters_SubpartitionName_s, Target_Table = Parameters_TrgtTableName_s, status_s, Resource 
+    | extend pDurationMs = datetime_diff('millisecond', end_t, start_t) 
+    | extend pipelineRunId_g=runId_g
+//     | where Resource == "ADF-CDH-DATAHUB-EU-04" and Target_Table == "pos_day_fct" and pipelineName_s == "pipeline_fct_load_master_template"
+    | where Target_Table == "pos_day_fct" and pipelineName_s == "pipeline_fct_load_master_template"
+| join kind = leftouter (
+adfdata
+    //only grab activity runs
+    | where Category == "ActivityRuns"
+    | where status_s == "Succeeded" or status_s == "Failed"
+    | project Resource, pipelineRunId_g, activityName_s, astart_t=start_t, aend_t=end_t, activityType_s, effectiveIntegrationRuntime_s, Output_executionDuration_d, Output_durationInQueue_integrationRuntimeQueue_d, Input_storedProcedureName_s, Input_storedProcedureParameters_at_enabled_value_s, Input_storedProcedureParameters_load_mode_value_s, DataProviderKey = Input_storedProcedureParameters_part_col1_val_value_s, TimePeriodEndDate = Input_storedProcedureParameters_part_col2_val_value_s, SourceTable = Input_storedProcedureParameters_src_table_value_s, SubjectArea = Input_storedProcedureParameters_subject_area_value_s  
+    | extend aDurationMs = datetime_diff('millisecond', aend_t, astart_t)
+) on pipelineRunId_g
+| project runId_g, pipelineName_s, Message, start_t, end_t, Data_Provider_Key, pDurationMs, aDurationMs, TimePeriodEndDate, Target_Table, status_s, Resource, activityName_s, astart_t, aend_t, activityType_s, Output_durationInQueue_integrationRuntimeQueue_d, Output_executionDuration_d, Input_storedProcedureName_s, Input_storedProcedureParameters_at_enabled_value_s, Input_storedProcedureParameters_load_mode_value_s, SubjectArea
+| summarize avg(aDurationMs) by Resource, activityName_s, activityType_s
+| order by activityType_s

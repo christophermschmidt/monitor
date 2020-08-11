@@ -1,0 +1,4 @@
+AzureDiagnostics
+| where Category contains "ExecRequests"
+| where Status_s == "Completed"
+| summarize totalQueries = dcount(RequestId_s) by ResourceClass_s

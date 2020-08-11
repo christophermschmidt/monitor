@@ -1,0 +1,12 @@
+let window = AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.AUTOMATION" 
+| where Category == "JobLogs";
+window
+| where ResultType == "Started"
+| project CorrelationId, RunbookName_s, JobId_g , ResourceGroup, Resource, StartTime = TimeGenerated  
+| join kind=leftouter (
+   window 
+   | where ResultType == "Completed"
+    | project CorrelationId, EndTime = TimeGenerated 
+) on CorrelationId
+| order by StartTime desc

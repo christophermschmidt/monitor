@@ -1,0 +1,23 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ServerName_s contains "poc01"
+| where OperationName != "VertiPaqSEQueryEnd" or EventSubclass_s == "0"
+//| where ServerName_s contains "-"
+| extend Engine_CPUTime=extract(@"([^,]*)", 1,CPUTime_s, typeof(long))
+| summarize cpu = sum(Engine_CPUTime)/1000, t = max(toint(Duration_s))/1000, max(iif(OperationName == "QueryBegin", TextData_s, "")) by RootActivityId_g
+| order by cpu desc
+
+//use this query to narrow in on a heavier qpu query from above. 
+AzureDiagnostics
+| where RootActivityId_g == "1983aee0-59fa-4dfa-9f19-1057ceb6c3a2"
+//| where OperationName == "QueryEnd"
+| project OperationName, CPUTime_s, TextData_s, EventSubclass_s, CurrentTime_t, Duration_s
+| order by CurrentTime_t asc
+
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ServerName_s contains "poc01"
+| where OperationName != "VertiPaqSEQueryEnd" or EventSubclass_s == "0"
+| where extract(@"([^,]*)", 1,Duration_s, typeof(long)) > 0
+//| where ServerName_s contains "-"
+| extend Engine_CPUTime=extract(@"([^,]*)", 1,CPUTime_s, typeof(long))
+| summarize qpu = sum(Engine_CPUTime)/3000/4 by bin(StartTime_t, 1s)
+| render timechart

@@ -1,0 +1,8 @@
+AzureDiagnostics
+| where TimeGenerated >= ago(3d)
+| where ResourceProvider == "MICROSOFT.SQL"
+| where Category == "ExecRequests"
+| summarize EntryPoint = min(SubmitTime_t), ExitPoint = max(EndTime_t) by SessionId_s
+| extend TotalSessionLength = datetime_diff('minute',ExitPoint, EntryPoint)
+| where TotalSessionLength >= 5
+| order by TotalSessionLength desc

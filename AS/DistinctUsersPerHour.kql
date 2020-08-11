@@ -1,0 +1,7 @@
+// the below query returns the number of distinct users which connected to each instance (including replicas) in 1 hour buckets over the timespan specified
+let window = AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES";
+window
+| where OperationName has "QueryEnd" and EventSubclass_s has "3"
+| summarize dcount(EffectiveUsername_s) by ServerName_s, timebin=bin(StartTime_t, 1h)
+| order by ServerName_s, timebin

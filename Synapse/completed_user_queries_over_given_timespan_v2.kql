@@ -1,0 +1,7 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.SQL" and Resource == "SQLDW-CDH-DATAHUB-NA-10"
+| where Category == "ExecRequests" //and Status_s == "Completed" 
+//| where RequestId_s == "QID7352418"
+| summarize ResourceClass = max(ResourceClass_s), Command = max(Command_s), ExplainOutput = max(ExplainOutput_s), TimeGenerated = min(TimeGenerated), SubmitTime = min(SubmitTime_t), EndCompileTime = max(EndCompileTime_t), StartTime = max(StartTime_t), EndTime = max(EndTime_t) by SessionId_s, RequestId_s
+| extend CleanCompileTime = format_datetime(EndCompileTime, "MM-dd-yyyy h:m:s.fffffff") 
+| extend Duration = datetime_diff('millisecond', EndTime , SubmitTime ), CompileTime = datetime_diff('millisecond',EndCompileTime, SubmitTime), RunTime = datetime_diff('millisecond',EndTime, EndCompileTime )

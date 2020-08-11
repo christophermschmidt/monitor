@@ -1,0 +1,3 @@
+AzureDiagnostics
+| where Category == "Connections"
+    and OperationName == "deviceConnect"

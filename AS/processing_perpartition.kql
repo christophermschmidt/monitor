@@ -1,0 +1,8 @@
+//use the below query to identify the processing time per partition in the model. The DurationMs report the number of milliseconds that elapsed in order to perform the processing
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES"
+//capture progress reort end events and event subclass 59.
+| where EventClass_s == "PROGRESS_REPORT_END"  and EventSubclass_s == "59" and TextData_s startswith "Finished processing partition"
+| extend DurationMs=extract(@"([^,]*)", 1,Duration_s, typeof(long))
+| summarize count() by  OperationName, EventClass_s,  EventSubclass_s, DurationMs, ObjectName_s, TextData_s, TimeGenerated
+| order by DurationMs

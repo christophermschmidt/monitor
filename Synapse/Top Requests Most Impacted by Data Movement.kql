@@ -1,0 +1,6 @@
+AzureDiagnostics
+| where Category == "RequestSteps" 
+| where OperationType_s in ("ShuffleMoveOperation", "BroadcastMoveOperation", "PartitionMoveOperation", "RoundRobinMoveOperation", "SingleSourceRoundRobinMoveOperation", "MoveOperation", "TrimMoveOperation")
+| where Status_s == "Complete"
+| project RequestId_s, duration=datetime_diff('millisecond',EndTime_t, StartTime_t)
+| order by duration desc 

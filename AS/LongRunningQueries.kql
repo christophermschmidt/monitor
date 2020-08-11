@@ -1,0 +1,6 @@
+//Use the below query to find/identify queries that exceeded a number of milliseconds when running. Update the last line to the number of milliseconds you want to filter for. The default value is 10,000 (10 seconds)
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES"
+| where OperationName == "QueryEnd"
+| project TimeGenerated, DatabaseName_s, StartTime_t, EndTime_t, Duration_s, CPUTime_s,  EffectiveUsername_s, TextData_s, RootActivityId_g 
+| where toint(Duration_s) >= 10000
