@@ -11,8 +11,7 @@ adfdata
     | project runId_g, pipelineName_s, Message, start_t, end_t, Data_Provider_Key= Parameters_PartitionName_s , TimePeriodEndDate = Parameters_SubpartitionName_s, Target_Table = Parameters_TrgtTableName_s, status_s, Resource 
     | extend pDurationMs = datetime_diff('millisecond', end_t, start_t) 
     | extend pipelineRunId_g=runId_g
-//     | where Resource == "ADF-CDH-DATAHUB-EU-04" and Target_Table == "pos_day_fct" and pipelineName_s == "pipeline_fct_load_master_template"
-    | where Target_Table == "pos_day_fct" and pipelineName_s == "pipeline_fct_load_master_template"
+    | where pipelineName_s == "pipeline_name"
 | join kind = leftouter (
 adfdata
     //only grab activity runs
