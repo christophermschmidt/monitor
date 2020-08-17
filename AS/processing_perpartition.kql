@@ -1,4 +1,4 @@
-//use the below query to identify the processing time per partition in the model. The DurationMs report the number of milliseconds that elapsed in order to perform the processing
+//use the below query to identify the processing time per partition in the model. The DurationMs report the number of milliseconds that elapsed in order to perform the processing. If you want to see just the overall timing per partition, //use the top one. If you want to see a detailed breakdown per partition showing the amount of time spent running the SQL query, transferring data over the network, and then compressing the data, use the 2nd one.
 AzureDiagnostics
 | where ResourceProvider == "MICROSOFT.ANALYSISSERVICES"
 //capture progress reort end events and event subclass 59.
@@ -6,3 +6,13 @@ AzureDiagnostics
 | extend DurationMs=extract(@"([^,]*)", 1,Duration_s, typeof(long))
 | summarize count() by  OperationName, EventClass_s,  EventSubclass_s, DurationMs, ObjectName_s, TextData_s, TimeGenerated
 | order by DurationMs
+
+
+
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES"
+//capture progress reort end events and event subclass 59.
+| where EventClass_s == "PROGRESS_REPORT_END"  and ((EventSubclass_s == 17 and TextData_s contains "reading") or (EventSubclass_s == 25 and TextData_s contains "SELECT") or (EventSubclass_s == 59 and  TextData_s contains "partition") or EventSubclass_s == 44 or EventSubclass_s == 6)
+| extend DurationMs=extract(@"([^,]*)", 1,Duration_s, typeof(long))
+| summarize count() by OperationName, EventClass_s, EventSubclass_s, DurationMs, ObjectName_s, TextData_s, TimeGenerated
+| order by ObjectName_s, DurationMs

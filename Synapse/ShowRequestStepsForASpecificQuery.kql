@@ -1,0 +1,5 @@
+//how many rows were returned from a specific query?
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.SQL"
+| where RequestId_s == "QID71279970" and Category == "RequestSteps" //SqlRequests
+| where Status_s == "Complete"

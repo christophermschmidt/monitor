@@ -1,0 +1,9 @@
+//show the run time per sql pool distribution
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.SQL"
+| where RequestId_s == "QID71279970" and Category == "SqlRequests"
+//only grab completed steps. Match the StepIndex to the appropriate StepIndex from the RequestSteps query previously run
+| where Status_s == "Complete" and StepIndex_d == 0
+| distinct TimeGenerated, Resource, RequestId_s, DistributionId_d, Status_s, StartTime_t, EndTime_t, Spid_d, Command_s
+| extend RunTime = datetime_diff('millisecond', EndTime_t, StartTime_t)
+| order by RunTime desc
