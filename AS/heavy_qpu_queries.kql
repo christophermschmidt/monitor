@@ -1,9 +1,12 @@
 AzureDiagnostics
-| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ServerName_s contains "poc01"
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and Resource contains "LAADHOC"
 | where OperationName != "VertiPaqSEQueryEnd" or EventSubclass_s == "0"
 //| where ServerName_s contains "-"
+//calculate the amount of time spent in the engine
 | extend Engine_CPUTime=extract(@"([^,]*)", 1,CPUTime_s, typeof(long))
-| summarize cpu = sum(Engine_CPUTime)/1000, t = max(toint(Duration_s))/1000, max(iif(OperationName == "QueryBegin", TextData_s, "")) by RootActivityId_g
+//summarize the QPU and Duration metrics and grab the query text by each request (RootActivityId)
+| summarize cpu = sum(Engine_CPUTime)/1000, TimeInSeconds = max(toint(Duration_s))/1000, max(iif(OperationName == "QueryBegin", TextData_s, "")) by RootActivityId_g
+//order by the most expensive query
 | order by cpu desc
 
 //use this query to narrow in on a heavier qpu query from above. 
