@@ -1,0 +1,14 @@
+//the azure metrics table within log analytics logs high level metrics within a specific service over a given timespan
+AzureMetrics
+| where TimeGenerated <= ago(7d)
+|  where ResourceProvider == "MICROSOFT.STORAGE"
+| project TimeGenerated, MetricName, Maximum, Minimum, Average, TimeGrain, UnitName
+
+//for example, if you want to see over a specific metric what the activity looked like here is a sample:
+AzureMetrics
+| where Resource == "<yourstorageaccount>"
+| project TimeGenerated, Resource, MetricName, Total, TimeGrain, UnitName
+| where MetricName == "Transactions"
+| summarize max(Total) by Resource, MetricName, UnitName, bin(TimeGenerated, 1m)
+| order by TimeGenerated
+| render timechart

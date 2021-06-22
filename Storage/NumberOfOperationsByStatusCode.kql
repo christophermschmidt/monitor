@@ -1,0 +1,13 @@
+//show the count of all operations over a gievn timespan, bucketed by 5 minutes. dispaly the result as a timechart
+StorageBlobLogs
+| where TimeGenerated >= ago (3d)
+| project  TimeGenerated, OperationName, AccountName, Protocol, AuthenticationType, StatusCode, StatusText, DurationMs, ServerLatencyMs, Uri, UserAgentHeader, Category
+| summarize count() by StatusCode, StatusText
+
+//then use this query to narrow in on something of note:
+StorageBlobLogs
+| where TimeGenerated >= ago (3d)
+| project  TimeGenerated, OperationName, AccountName, Protocol, AuthenticationType, StatusCode, StatusText, DurationMs, ServerLatencyMs, Uri, UserAgentHeader, Category
+| where StatusCode == "500"
+
+//you can use this result to go find out more information about the client that initiated the request. was it doing anything unusual during the timeframe? 

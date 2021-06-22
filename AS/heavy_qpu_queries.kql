@@ -1,5 +1,5 @@
 AzureDiagnostics
-| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and Resource contains "LAADHOC"
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and Resource contains "<yourservername>"
 | where OperationName != "VertiPaqSEQueryEnd" or EventSubclass_s == "0"
 //| where ServerName_s contains "-"
 //calculate the amount of time spent in the engine
@@ -11,13 +11,13 @@ AzureDiagnostics
 
 //use this query to narrow in on a heavier qpu query from above. 
 AzureDiagnostics
-| where RootActivityId_g == "1983aee0-59fa-4dfa-9f19-1057ceb6c3a2"
+| where RootActivityId_g == "<yourraidid>"
 //| where OperationName == "QueryEnd"
 | project OperationName, CPUTime_s, TextData_s, EventSubclass_s, CurrentTime_t, Duration_s
 | order by CurrentTime_t asc
 
 AzureDiagnostics
-| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ServerName_s contains "poc01"
+| where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and ServerName_s contains "<yourservername>"
 | where OperationName != "VertiPaqSEQueryEnd" or EventSubclass_s == "0"
 | where extract(@"([^,]*)", 1,Duration_s, typeof(long)) > 0
 //| where ServerName_s contains "-"

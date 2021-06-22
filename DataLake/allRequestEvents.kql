@@ -1,0 +1,8 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.DATALAKESTORE" and TimeGenerated >= ago(3d)
+//request logs capture every API request made on the Data Lake Storage Gen1 account
+| where Category == "Requests"
+| project Resource, ResourceGroup, ResourceType, OperationName, ResultType, CorrelationId, HttpMethod_s, Path_s, identity_s, UserId_g, StoreEgressSize_d, StoreIngressSize_d, CallerIPAddress, StartTime_t, EndTime_t, RequestDuration = datetime_diff("Millisecond", EndTime_t, StartTime_t)
+| extend Path = split(Path_s, '/')
+| mv-expand root = Path[0], level1 = Path[1], level2 = Path[2], level3 = Path[3], level4 = Path[4], level5 = Path[5], level6 = Path[6], level7 = Path[7], level8 = Path[8], level9 = Path[9]
+| extend likelyfileName = coalesce(level9, level8, level7, level6, level5, level4)

@@ -1,0 +1,6 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.DATALAKESTORE" and TimeGenerated >= ago(3d)
+| where Category == "Requests"
+//am I being throttled? Have I submitted too many requests within a given timeframe?
+| where ResultType == 429
+| project Resource, ResourceGroup, ResourceType, OperationName, ResultType, CorrelationId, HttpMethod_s, Path_s, identity_s, UserId_g, StoreEgressSize_d, StoreIngressSize_d, CallerIPAddress, StartTime_t, EndTime_t

@@ -1,5 +1,5 @@
  let window =  AzureDiagnostics
-   | where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" and RootActivityId_g == "<yourRAIDactivityIDhere>";
+   | where ResourceProvider == "MICROSOFT.ANALYSISSERVICES" //and RootActivityId_g == "<yourRAIDactivityIDhere>";
 window
 | where OperationName has "QueryEnd" or (OperationName has "CommandEnd" and EventSubclass_s == 38)
 | where extract(@"([^,]*)", 1,Duration_s, typeof(long)) > 0

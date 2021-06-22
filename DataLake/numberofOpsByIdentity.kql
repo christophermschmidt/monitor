@@ -1,0 +1,5 @@
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.DATALAKESTORE" and TimeGenerated >= ago(3d)
+| where Category == "Requests"
+| project identity_s, CorrelationId, HttpMethod_s
+| summarize count() by identity_s, HttpMethod_s
