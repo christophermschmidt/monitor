@@ -1,0 +1,7 @@
+The user agent normally passes along information about where the request is coming from. By using this we can determine where heavier workloads are appearing.
+StorageBlobLogs
+| where TimeGenerated >= ago (3d)
+| project  TimeGenerated, UserAgentHeader
+| summarize count() by UserAgentHeader, bin(TimeGenerated, 5m)
+| order by TimeGenerated
+| render timechart

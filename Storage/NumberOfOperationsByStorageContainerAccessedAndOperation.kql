@@ -1,0 +1,8 @@
+//show the number of operations by the storage container that was accessed and the UserAgent that accessed the container by minute over the given timespan
+StorageBlobLogs
+| where TimeGenerated >= ago (3d)
+| project  TimeGenerated, OperationName, AccountName, Protocol, AuthenticationType, StatusCode, StatusText, DurationMs, ServerLatencyMs, Uri, UserAgentHeader, Category
+| extend Path = split(Uri, '/')
+| mv-expand root = Path[0], level1 = Path[1], level2 = Path[2], level3 = Path[3], level4 = Path[4], level5 = Path[5], level6 = Path[6], level7 = Path[7], level8 = Path[8], level9 = Path[9]
+| summarize count() by tostring(level3), bin(TimeGenerated, 1m), UserAgentHeader
+| order by TimeGenerated
