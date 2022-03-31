@@ -1,5 +1,5 @@
 let adfdata = //start by getting the runs that completed, either by using the Completed or Failed status codes
-union AzureDiagnostics, workspace("log-analytics-cdh-datahub-eu-04").AzureDiagnostics, workspace("log-analytics-cdh-datahub-na-13").AzureDiagnostics, workspace("log-analytics-cdh-datahub-ja-01").AzureDiagnostics
+union AzureDiagnostics, workspace("<yourworkspacenamehere>").AzureDiagnostics
 //only pull the last 7 days
 | where TimeGenerated >= ago(7d)
 //where the service is Data Factory
